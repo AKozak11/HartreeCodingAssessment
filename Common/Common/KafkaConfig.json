@@ -1,0 +1,11 @@
+{
+    "KafkaConfig": {
+        "AutoOffsetReset": 0,
+        "BootstrapServers": "localhost:9092",
+        "EnableAutoCommit": true,
+        "SecurityProtocol": 0
+    },
+    "MessageConfig": {
+        "KafkaTopic": "RANDOM_NUMBER_DATA"
+    }
+}
