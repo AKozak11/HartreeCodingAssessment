@@ -30,8 +30,6 @@ namespace RandomNumberProducer
                     return new MessageWriter<string, string>(producerMessageConfig.KafkaTopic, serviceProvider.GetRequiredService<ProducerConfig>());
                 });
 
-
-
                 services.AddHostedService<Worker>();
             });
         }

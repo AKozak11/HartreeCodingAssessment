@@ -1,20 +1,29 @@
-namespace RandomNumberProducer;
+using Common.Messaging;
 
-public class Worker : BackgroundService
+namespace RandomNumberProducer
 {
-    private readonly ILogger<Worker> _logger;
-
-    public Worker(ILogger<Worker> logger)
+    public class Worker : BackgroundService
     {
-        _logger = logger;
-    }
+        private IMessageWriter<string, string> _messageWriter;
+        private readonly ILogger<Worker> _logger;
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        while (!stoppingToken.IsCancellationRequested)
+        public Worker(ILogger<Worker> logger, IMessageWriter<string, string> messageWriter)
         {
-            _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-            await Task.Delay(1000, stoppingToken);
+            _logger = logger;
+            _messageWriter = messageWriter;
+        }
+
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            Random r = new Random((int)(DateTime.Now.Ticks % 1000000));
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                long n = r.NextInt64(-1000000000, 1000000000);
+                await _messageWriter.WriteAsync($"{n}", $"The random value is {n}");
+
+                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                await Task.Delay(1000, stoppingToken);
+            }
         }
     }
 }
