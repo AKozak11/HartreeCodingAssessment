@@ -1,6 +1,7 @@
 using Confluent.Kafka;
 using Common.Messaging;
 using Common.Models;
+using RandomNumberProducer.Services;
 
 namespace RandomNumberProducer
 {
@@ -8,7 +9,7 @@ namespace RandomNumberProducer
     {
         public static IConfiguration Configuration { get; set; }
         public static void Main(string[] args) => CreateHostBuilder(args).Build().Run(); //.RunAsync().GetAwaiter().GetResult();
-        public static IHostBuilder CreateHostBuilder(string[] args)
+        private static IHostBuilder CreateHostBuilder(string[] args)
         {
             return new HostBuilder().ConfigureServices(async (hostBuilderContext, services) =>
             {
@@ -23,6 +24,7 @@ namespace RandomNumberProducer
 
                 ProducerMessageConfig producerMessageConfig = new ProducerMessageConfig();
                 Configuration.Bind("MessageConfig", producerMessageConfig);
+                Configuration.Bind("ProducerMessageConfig", producerMessageConfig);
                 services.AddSingleton<ProducerMessageConfig>(producerMessageConfig);
 
                 services.AddSingleton<IMessageWriter<string, string>>((serviceProvider) =>
@@ -30,7 +32,7 @@ namespace RandomNumberProducer
                     return new MessageWriter<string, string>(producerMessageConfig.KafkaTopic, serviceProvider.GetRequiredService<ProducerConfig>());
                 });
 
-                services.AddHostedService<Worker>();
+                services.AddHostedService<MessageProducerService>();
             });
         }
         // IHost host = Host.CreateDefaultBuilder(args)
