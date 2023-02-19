@@ -1,7 +1,9 @@
 using Confluent.Kafka;
 using Common.Models;
 using Common.Messaging;
+using EntityConnector.Models;
 using RandomNumberConsumer.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace RandomNumberConsumer
 {
@@ -31,6 +33,14 @@ namespace RandomNumberConsumer
                 Configuration.Bind("KafkaConfig", excelRTDServiceConsumerConfig);
                 Configuration.Bind("ExcelRTDServiceConsumerConfig:KafkaConfig", excelRTDServiceConsumerConfig);
 
+                DbContextOptionsBuilder<Context> optionsBuilder = new DbContextOptionsBuilder<Context>();
+                optionsBuilder.UseSqlServer(Configuration["ConnectionString"]);
+                using (Context context = new Context(optionsBuilder.Options))
+                {
+                    context.Database.Migrate();
+                }
+                
+                services.AddDbContext<Context>(optionsBuilder => optionsBuilder.UseSqlServer(Configuration["ConnectionString"]));
 
                 // message reader factory
                 // one for sql service consumer
