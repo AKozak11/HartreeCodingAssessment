@@ -18,7 +18,7 @@ namespace Common.Messaging
         public Message<TKey, TValue> ReadMessage()
         {
 
-            ConsumeResult<TKey, TValue> consumeResult = _consumer.Consume(500);
+            ConsumeResult<TKey, TValue> consumeResult = _consumer.Consume(100);
 
             if (consumeResult is null) return null;
 

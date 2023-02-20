@@ -4,3 +4,9 @@ obj/
 */obj/
 */*/bin/
 */*/obj/
+.vscode
+*/.vscode
+*/*/.vscode
+.vs
+*/.vs
+*/*/.vs

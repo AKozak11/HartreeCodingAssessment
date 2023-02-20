@@ -5,5 +5,5 @@ docker compose -f .\docker-compose.yml up -d
 # broker is the name of the container from docker-compose file
 docker exec -it broker kafka-topics --bootstrap-server broker:9092 --create --topic 'RANDOM_NUMBER_DATA'
 
-# cd .\EntityConnector\EntityConnector\
-# dotnet ef --startup-project ..\..\RandomNumberConsumer\RandomNumberConsumer\ migrations add InitialCreate
+cd .\EntityConnector\EntityConnector\
+dotnet ef --startup-project ..\..\RandomNumberConsumer\RandomNumberConsumer\ migrations add InitialCreate

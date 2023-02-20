@@ -7,6 +7,10 @@
         "SessionTimeoutMs": 6000
     },
     "MessageConfig": {
-        "KafkaTopic": "RANDOM_NUMBER_DATA"
+        "KafkaTopic": "RANDOM_NUMBER_DATA",
+        "Keys": [
+            "Key1",
+            "Key2"
+        ]
     }
 }

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EntityConnector.Migrations
 {
     [DbContext(typeof(Context))]
-    [Migration("20230219070619_InitialCreate")]
+    [Migration("20230219091126_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -25,7 +25,7 @@ namespace EntityConnector.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("EntityConnector.Models.RandomNumberData", b =>
+            modelBuilder.Entity("EntityConnector.Models.NumberData", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
@@ -45,7 +45,7 @@ namespace EntityConnector.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("numberData");
+                    b.ToTable("Data");
                 });
 #pragma warning restore 612, 618
         }

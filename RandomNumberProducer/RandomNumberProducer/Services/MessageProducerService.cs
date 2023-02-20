@@ -10,13 +10,13 @@ namespace RandomNumberProducer.Services
         private readonly ILogger<MessageProducerService> _logger;
         private IMessageWriter<string, string> _messageWriter;
 
-        private ProducerMessageConfig _producerMessageConfig;
+        private MessageConfig _messageConfig;
 
-        public MessageProducerService(ILogger<MessageProducerService> logger, IMessageWriter<string, string> messageWriter, ProducerMessageConfig producerMessageConfig)
+        public MessageProducerService(ILogger<MessageProducerService> logger, IMessageWriter<string, string> messageWriter, MessageConfig messageConfig)
         {
             _logger = logger;
             _messageWriter = messageWriter;
-            _producerMessageConfig = producerMessageConfig;
+            _messageConfig = messageConfig;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -29,7 +29,7 @@ namespace RandomNumberProducer.Services
                 Task delay = Task.Delay(1000, stoppingToken);
                 sw.Start();
 
-                foreach (string key in _producerMessageConfig.Keys)
+                foreach (string key in _messageConfig.Keys)
                 {
                     string message = GetMessage(key, random);
 
@@ -41,7 +41,7 @@ namespace RandomNumberProducer.Services
                 await delay;
 
                 sw.Stop();
-                Console.WriteLine($"{_producerMessageConfig.Keys.Length} message(s) Written in {Math.Round(sw.Elapsed.TotalSeconds)} second(s)");
+                Console.WriteLine($"{_messageConfig.Keys.Length} message(s) Written in {Math.Round(sw.Elapsed.TotalSeconds)} second(s)");
 
                 sw.Reset();
             }

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EntityConnector.Models
 {
-    public class RandomNumberData
+    public class NumberData
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

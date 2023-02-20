@@ -22,14 +22,13 @@ namespace RandomNumberProducer
                 Configuration.Bind("KafkaConfig", producerConfig);
                 services.AddSingleton<ProducerConfig>(producerConfig);
 
-                ProducerMessageConfig producerMessageConfig = new ProducerMessageConfig();
-                Configuration.Bind("MessageConfig", producerMessageConfig);
-                Configuration.Bind("ProducerMessageConfig", producerMessageConfig);
-                services.AddSingleton<ProducerMessageConfig>(producerMessageConfig);
+                MessageConfig messageConfig = new MessageConfig();
+                Configuration.Bind("MessageConfig", messageConfig);
+                services.AddSingleton<MessageConfig>(messageConfig);
 
                 services.AddSingleton<IMessageWriter<string, string>>((serviceProvider) =>
                 {
-                    return new MessageWriter<string, string>(producerMessageConfig.KafkaTopic, serviceProvider.GetRequiredService<ProducerConfig>());
+                    return new MessageWriter<string, string>(messageConfig.KafkaTopic, serviceProvider.GetRequiredService<ProducerConfig>());
                 });
 
                 services.AddHostedService<MessageProducerService>();

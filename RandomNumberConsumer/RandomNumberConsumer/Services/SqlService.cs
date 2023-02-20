@@ -1,5 +1,9 @@
 using Confluent.Kafka;
 using Common.Messaging;
+using Common.Models;
+using Newtonsoft.Json;
+using EntityConnector.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace RandomNumberConsumer.Services
 {
@@ -8,11 +12,13 @@ namespace RandomNumberConsumer.Services
         private readonly ILogger<SqlService> _logger;
         Func<string, IMessageReader<string, string>> _readerFactory;
         IMessageReader<string, string> _messageReader;
-        public SqlService(ILogger<SqlService> logger, Func<string, IMessageReader<string, string>> readerFactory)
+        DbContextOptions<Context> _contextOptions;
+        public SqlService(ILogger<SqlService> logger, Func<string, IMessageReader<string, string>> readerFactory, DbContextOptions<Context> contextOptions)
         {
             _logger = logger;
             _readerFactory = readerFactory;
-            _messageReader = readerFactory("sql");
+            _messageReader = _readerFactory("sql");
+            _contextOptions = contextOptions;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -24,15 +30,36 @@ namespace RandomNumberConsumer.Services
                 _messageReader.Dispose();
                 cts.Cancel();
             };
-
-            while (!stoppingToken.IsCancellationRequested)
+            await Task.Run(() =>
             {
-                Message<string, string> message = _messageReader.ReadMessage();
+                while (!stoppingToken.IsCancellationRequested)
+                {
+                    Message<string, string> message = _messageReader.ReadMessage();
 
-                if (message is not null) Console.WriteLine($"{message.Key} => {message.Value}");
-                // _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-                await Task.Delay(1000, stoppingToken);
-            }
+                    if (message is not null && !string.IsNullOrEmpty(message.Value))
+                    {
+
+                        _logger.LogInformation($"Message received. Key = {message.Key}, Value = {message.Value}");
+
+                        RandomNumberData rnd = JsonConvert.DeserializeObject<RandomNumberData>(message.Value);
+                        using (Context context = new Context(_contextOptions))
+                        {
+
+                            NumberData dbEntry = new NumberData
+                            {
+                                Key = message.Key,
+                                Time = rnd.Value.Time,
+                                Value = rnd.Value.Value
+                            };
+
+                            context.Data.Add(dbEntry);
+                            context.SaveChanges();
+                        }
+                    }
+                }
+            });
+
+
         }
     }
 }

@@ -12,7 +12,7 @@ namespace EntityConnector.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "numberData",
+                name: "Data",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
@@ -23,7 +23,7 @@ namespace EntityConnector.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_numberData", x => x.ID);
+                    table.PrimaryKey("PK_Data", x => x.ID);
                 });
         }
 
@@ -31,7 +31,7 @@ namespace EntityConnector.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "numberData");
+                name: "Data");
         }
     }
 }
