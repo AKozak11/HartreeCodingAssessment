@@ -25,16 +25,14 @@ namespace RandomNumberConsumer
                 ConsumerConfig sqlServiceConsumerConfig = new ConsumerConfig();
                 Configuration.Bind("KafkaConfig", sqlServiceConsumerConfig);
                 Configuration.Bind("SqlServiceConsumerConfig:KafkaConfig", sqlServiceConsumerConfig);
+                services.AddSingleton<ConsumerConfig>(sqlServiceConsumerConfig);
 
-                ConsumerConfig excelRTDServiceConsumerConfig = new ConsumerConfig();
-                Configuration.Bind("KafkaConfig", excelRTDServiceConsumerConfig);
-                Configuration.Bind("ExcelRTDServiceConsumerConfig:KafkaConfig", excelRTDServiceConsumerConfig);
 
                 MessageConfig messageConfig = new MessageConfig();
                 Configuration.Bind("MessageConfig", messageConfig);
                 services.AddSingleton<MessageConfig>(messageConfig);
 
-                services.AddDbContext<Context>(optionsBuilder => optionsBuilder.UseSqlServer(Configuration["ConnectionString"]));
+                services.AddDbContext<Context>(optionsBuilder => optionsBuilder.UseSqlServer(Configuration["ConnectionString"]), ServiceLifetime.Transient);
 
                 DbContextOptionsBuilder<Context> optionsBuilder = new DbContextOptionsBuilder<Context>();
                 optionsBuilder.UseSqlServer(Configuration["ConnectionString"]);
@@ -43,30 +41,13 @@ namespace RandomNumberConsumer
                     context.Database.Migrate();
                 }
 
-                // message reader factory
-                // one for sql service consumer
-                // and one for excel rtd service consumer
-                services.AddSingleton<Func<string, IMessageReader<string, string>>>(sp => key =>
+                services.AddSingleton<IMessageReader<string, string>>(sp =>
                 {
-                    if (key == "sql")
-                    {
-                        return new MessageReader<string, string>(messageConfig.KafkaTopic, sqlServiceConsumerConfig);
-                    }
-                    else if (key == "excel")
-                    {
-                        return new MessageReader<string, string>(messageConfig.KafkaTopic, excelRTDServiceConsumerConfig);
-                    }
-                    else throw new InvalidOperationException($"Cannot create MessageReader of type {key}. Options are [sql, excel].");
+                    return new MessageReader<string, string>(messageConfig.KafkaTopic, sp.GetRequiredService<ConsumerConfig>());
                 });
 
 
-                // services.AddSingleton<NumServer>(sp =>
-                // {
-                //     return new NumServer(sp.GetRequiredService<Func<string, IMessageReader<string, string>>>(), sp.GetRequiredService<MessageConfig>());
-                // });
-
                 services.AddHostedService<SqlService>();
-                // services.AddHostedService<ExcelRTDService>();
 
             }).ConfigureLogging(logging =>
             {
@@ -75,14 +56,5 @@ namespace RandomNumberConsumer
                 logging.AddConsole();
             });
         }
-        // private static         
-        // IHost host = Host.CreateDefaultBuilder(args)
-        //     .ConfigureServices(services =>
-        //     {
-        //         services.AddHostedService<Worker>();
-        //     })
-        //     .Build();
-
-        // host.Run();
     }
 }

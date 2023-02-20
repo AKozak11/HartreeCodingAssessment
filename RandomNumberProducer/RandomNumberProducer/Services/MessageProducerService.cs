@@ -24,30 +24,32 @@ namespace RandomNumberProducer.Services
             Random random = new Random((int)(DateTime.Now.Ticks % int.MaxValue));
             Stopwatch sw = new Stopwatch();
 
-            while (!stoppingToken.IsCancellationRequested)
+            await Task.Run(async () =>
             {
-                Task delay = Task.Delay(1000, stoppingToken);
-                sw.Start();
-
-                foreach (string key in _messageConfig.Keys)
+                while (!stoppingToken.IsCancellationRequested)
                 {
-                    string message = GetMessage(key, random);
+                    Task delay = Task.Delay(1000, stoppingToken);
+                    sw.Start();
 
-                    await _messageWriter.WriteAsync(key, message);
+                    foreach (string key in _messageConfig.Keys)
+                    {
+                        string message = BuildMessage(key, random);
 
-                    _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                        await _messageWriter.WriteAsync(key, message);
+                    }
+
+                    await delay;
+
+                    sw.Stop();
+                    Console.WriteLine($"{_messageConfig.Keys.Length} message(s) Written in {Math.Round(sw.Elapsed.TotalSeconds)} second(s)");
+
+                    sw.Reset();
                 }
+            });
 
-                await delay;
-
-                sw.Stop();
-                Console.WriteLine($"{_messageConfig.Keys.Length} message(s) Written in {Math.Round(sw.Elapsed.TotalSeconds)} second(s)");
-
-                sw.Reset();
-            }
         }
 
-        private string GetMessage(string key, Random random)
+        private string BuildMessage(string key, Random random)
         {
             float randomNum = (float)random.NextDouble();
 

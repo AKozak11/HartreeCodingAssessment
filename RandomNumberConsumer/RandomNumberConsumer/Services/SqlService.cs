@@ -10,14 +10,12 @@ namespace RandomNumberConsumer.Services
     public class SqlService : BackgroundService
     {
         private readonly ILogger<SqlService> _logger;
-        Func<string, IMessageReader<string, string>> _readerFactory;
         IMessageReader<string, string> _messageReader;
         DbContextOptions<Context> _contextOptions;
-        public SqlService(ILogger<SqlService> logger, Func<string, IMessageReader<string, string>> readerFactory, DbContextOptions<Context> contextOptions)
+        public SqlService(ILogger<SqlService> logger, IMessageReader<string, string> messageReader, DbContextOptions<Context> contextOptions)
         {
             _logger = logger;
-            _readerFactory = readerFactory;
-            _messageReader = _readerFactory("sql");
+            _messageReader = messageReader;
             _contextOptions = contextOptions;
         }
 

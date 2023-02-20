@@ -7,3 +7,8 @@ docker exec -it broker kafka-topics --bootstrap-server broker:9092 --create --to
 
 cd .\EntityConnector\EntityConnector\
 dotnet ef --startup-project ..\..\RandomNumberConsumer\RandomNumberConsumer\ migrations add InitialCreate
+
+cd ..\..\
+dotnet clean
+dotnet restore
+dotnet build
