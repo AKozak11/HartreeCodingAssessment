@@ -6,6 +6,10 @@ namespace Common.Messaging
     {
         private ProducerConfig _producerConfig;
         private string _topic;
+        /// <summary>
+        /// Wrapper for kafka producer. Produce messages to topic <paramref name="topic"/>
+        /// using configurations specified in <paramref name="producerConfig"/>
+        /// </summary>
         public MessageWriter(string topic, ProducerConfig producerConfig)
         {
             _topic = topic;

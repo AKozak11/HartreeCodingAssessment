@@ -7,6 +7,10 @@ namespace Common.Messaging
         private ConsumerConfig _consumerConfig;
         private string _topic;
         private IConsumer<TKey, TValue> _consumer;
+        /// <summary>
+        /// Wrapper for kafka consumer. Consume messages from topic <paramref name="topic"/>
+        /// using configurations specified in <paramref name="consumerConfig"/>
+        /// </summary>
         public MessageReader(string topic, ConsumerConfig consumerConfig)
         {
             _topic = topic;
