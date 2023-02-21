@@ -1,6 +1,6 @@
 {
     "KafkaConfig": {
-        "AutoOffsetReset": "earliest",
+        "AutoOffsetReset": "Earliest",
         "BootstrapServers": "localhost:9092",
         "EnableAutoCommit": true,
         "SecurityProtocol": 0,
