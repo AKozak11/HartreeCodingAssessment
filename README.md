@@ -11,7 +11,6 @@ Docker: Docker version 20.10.22, Docker Compose version v2.15.1
 This will:
     * build images and run containers for kafka zookeeper, kafka broker, and mssql
     * create a new kafka topic called 'RANDOM_NUMBER_DATA' that the services will consume and produce messages to
-    * create a database in the mssql container named 'RandomNumberData' with one table named 'dbo.Data' using the pre-generated migrations in the EntityConnector project
     * clean solution, restore nuget packages, build solution<br/>
 <b>Step 2.</b> Run services<br/>
 From .\RandomNumberConsumer\RandomNumberConsumer\ directory in a powershell console, run project<br/>
