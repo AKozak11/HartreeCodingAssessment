@@ -13,7 +13,6 @@ namespace RtdFunctions
         private readonly Dictionary<string, Topic> topics = new Dictionary<string, Topic>();
         private Dictionary<string, ConsumeResult<string, string>> _previousMessage = new Dictionary<string, ConsumeResult<string, string>>();
         private IMessageReader<string, string> _messageReader;
-        private MessageConfig _messageConfig;
         private Timer timer;
 
         public NumServer()
@@ -35,19 +34,19 @@ namespace RtdFunctions
         private void Callback(object o)
         {
             Stop();
-            ConsumeResult<string, string> message = _messageReader.Consume();
-            if (message is not null && !string.IsNullOrEmpty(message.Value))
+            ConsumeResult<string, string> consumeResult = _messageReader.Consume();
+            if (consumeResult is not null && !string.IsNullOrEmpty(consumeResult.Message.Value))
             {
                 // If there is an entry for this message key in the dictionary, commit it so that it won't be consumed again when the excel add in is closed and opened
                 // Do not commit the current message so that it will be read again when add in is reopened
-                if (_previousMessage.ContainsKey(message.Key)) _messageReader.Commit(_previousMessage[message.Key]);
-                else _previousMessage.Add(message.Key, message);
+                if (_previousMessage.ContainsKey(consumeResult.Message.Key)) _messageReader.Commit(_previousMessage[consumeResult.Message.Key]);
+                else _previousMessage.Add(consumeResult.Message.Key, consumeResult);
 
                 // save current message in memory so it is committed on next message read with same key
-                _previousMessage[message.Key] = message;
+                _previousMessage[consumeResult.Message.Key] = consumeResult;
 
-                RandomNumberData rnd = JsonConvert.DeserializeObject<RandomNumberData>(message.Value);
-                if (topics.ContainsKey(message.Key)) topics[message.Key].UpdateValue(rnd.Value.Value);
+                RandomNumberData rnd = JsonConvert.DeserializeObject<RandomNumberData>(consumeResult.Message.Value);
+                if (topics.ContainsKey(consumeResult.Message.Key)) topics[consumeResult.Message.Key].UpdateValue(rnd.Value.Value);
             }
             Start();
         }

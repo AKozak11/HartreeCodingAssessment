@@ -28,8 +28,8 @@ namespace Common.Messaging
 
             return new Message<TKey, TValue>
             {
-                Key = consumeResult.Key,
-                Value = consumeResult.Value
+                Key = consumeResult.Message.Key,
+                Value = consumeResult.Message.Value
             };
 
         }

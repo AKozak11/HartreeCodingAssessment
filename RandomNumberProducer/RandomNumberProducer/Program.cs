@@ -7,14 +7,14 @@ namespace RandomNumberProducer
 {
     class Program
     {
-        public static IConfiguration Configuration { get; set; }
+        public static IConfiguration? Configuration { get; set; }
 
         // *ENTRY POINT*
         public static void Main(string[] args) => CreateHostBuilder(args).Build().Run();
 
         private static IHostBuilder CreateHostBuilder(string[] args)
         {
-            return new HostBuilder().ConfigureServices(async (hostBuilderContext, services) =>
+            return new HostBuilder().ConfigureServices((hostBuilderContext, services) =>
             {
                 Configuration = new ConfigurationBuilder()
                     .AddJsonFile("KafkaConfig.json", optional: false, reloadOnChange: true)

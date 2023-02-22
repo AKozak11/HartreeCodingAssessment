@@ -10,7 +10,8 @@ namespace RandomNumberConsumer
 {
     class Program
     {
-        public static IConfiguration Configuration { get; set; }
+        public static IConfiguration? Configuration { get; set; }
+        
         public static void Main(string[] args) => CreateHostBuilder(args).Build().Run();
 
         private static IHostBuilder CreateHostBuilder(string[] args)
