@@ -1,10 +1,10 @@
-using RtdFunctions;
 using Confluent.Kafka;
 using Common.Models;
 using Common.Messaging;
 using EntityConnector.Models;
 using RandomNumberConsumer.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace RandomNumberConsumer
 {
@@ -32,7 +32,10 @@ namespace RandomNumberConsumer
                 Configuration.Bind("MessageConfig", messageConfig);
                 services.AddSingleton<MessageConfig>(messageConfig);
 
-                services.AddDbContext<Context>(optionsBuilder => optionsBuilder.UseSqlServer(Configuration["ConnectionString"]), ServiceLifetime.Transient);
+                services.AddDbContext<Context>(optionsBuilder => optionsBuilder.UseSqlServer(Configuration["ConnectionString"], options =>
+                {
+                    options.EnableRetryOnFailure(5);
+                }), ServiceLifetime.Transient);
 
                 DbContextOptionsBuilder<Context> optionsBuilder = new DbContextOptionsBuilder<Context>();
                 optionsBuilder.UseSqlServer(Configuration["ConnectionString"]);

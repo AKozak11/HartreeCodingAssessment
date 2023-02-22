@@ -24,40 +24,55 @@ namespace RandomNumberConsumer.Services
             CancellationTokenSource cts = new CancellationTokenSource();
             Console.CancelKeyPress += (_, e) =>
             {
-                Console.WriteLine("Cancel key clicked.");
-                _messageReader.Dispose();
+                _logger.LogCritical($"Cancel key clicked. Application shut down at {DateTime.UtcNow.ToString()}");
                 cts.Cancel();
             };
+
             await Task.Run(() =>
             {
                 while (!stoppingToken.IsCancellationRequested)
                 {
-                    Message<string, string> message = _messageReader.ReadMessage();
-
-                    if (message is not null && !string.IsNullOrEmpty(message.Value))
+                    try
                     {
+                        Message<string, string> message = _messageReader.ReadMessage();
 
-                        _logger.LogInformation($"Message received. Key = {message.Key}, Value = {message.Value}");
-
-                        RandomNumberData rnd = JsonConvert.DeserializeObject<RandomNumberData>(message.Value);
-                        using (Context context = new Context(_contextOptions))
+                        if (message is not null && !string.IsNullOrEmpty(message.Value))
                         {
+                            _logger.LogInformation($"Message received. key = {message.Key}, value = {message.Value}");
 
-                            NumberData dbEntry = new NumberData
+                            RandomNumberData rnd = JsonConvert.DeserializeObject<RandomNumberData>(message.Value);
+                            using (Context context = new Context(_contextOptions))
                             {
-                                Key = message.Key,
-                                Time = rnd.Value.Time,
-                                Value = rnd.Value.Value
-                            };
+                                NumberData dbEntry = new NumberData
+                                {
+                                    Key = message.Key,
+                                    Time = rnd.Value.Time,
+                                    Value = rnd.Value.Value
+                                };
 
-                            context.Data.Add(dbEntry);
-                            context.SaveChanges();
+                                _logger.LogInformation($"Saving message to database. key = {message.Key}");
+
+                                context.Data.Add(dbEntry);
+                                context.SaveChanges();
+
+                                _logger.LogInformation($"Message successfully saved to database. key = {message.Key}");
+                            }
                         }
+                    }
+                    catch (ConsumeException cEx)
+                    {
+                        _logger.LogError($"There was an issue reading from Kafka. Exception: {cEx}");
+                    }
+                    catch (Microsoft.Data.SqlClient.SqlException sqlEx)
+                    {
+                        _logger.LogError($"Encoutered an error while writing to the database. Exception: {sqlEx}");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError($"Unhandled error while processing. Exception: {ex}");
                     }
                 }
             });
-
-
         }
     }
 }

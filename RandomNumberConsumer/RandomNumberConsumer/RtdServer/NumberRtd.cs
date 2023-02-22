@@ -6,14 +6,12 @@ using ExcelDna.Integration;
 using ExcelDna.Integration.Rtd;
 using System.Collections.Generic;
 
-// using System.Timers;
-// namespace NumberRtd
-// {
 namespace RtdFunctions
 {
     public class NumServer : ExcelRtdServer
     {
         private readonly Dictionary<string, Topic> topics = new Dictionary<string, Topic>();
+        private Dictionary<string, ConsumeResult<string, string>> _previousMessage = new Dictionary<string, ConsumeResult<string, string>>();
         private IMessageReader<string, string> _messageReader;
         private MessageConfig _messageConfig;
         private Timer timer;
@@ -21,7 +19,6 @@ namespace RtdFunctions
         public NumServer()
         {
             timer = new Timer(Callback);
-            _messageConfig = GetMessageConfig();
             _messageReader = GetMessageReader();
         }
 
@@ -38,9 +35,17 @@ namespace RtdFunctions
         private void Callback(object o)
         {
             Stop();
-            Message<string, string> message = _messageReader.ReadMessage();
+            ConsumeResult<string, string> message = _messageReader.Consume();
             if (message is not null && !string.IsNullOrEmpty(message.Value))
             {
+                // If there is an entry for this message key in the dictionary, commit it so that it won't be consumed again when the excel add in is closed and opened
+                // Do not commit the current message so that it will be read again when add in is reopened
+                if (_previousMessage.ContainsKey(message.Key)) _messageReader.Commit(_previousMessage[message.Key]);
+                else _previousMessage.Add(message.Key, message);
+
+                // save current message in memory so it is committed on next message read with same key
+                _previousMessage[message.Key] = message;
+
                 RandomNumberData rnd = JsonConvert.DeserializeObject<RandomNumberData>(message.Value);
                 if (topics.ContainsKey(message.Key)) topics[message.Key].UpdateValue(rnd.Value.Value);
             }
@@ -56,46 +61,34 @@ namespace RtdFunctions
 
         protected override object ConnectData(Topic topic, IList<string> topicInfo, ref bool newValues)
         {
-            if (!topics.ContainsKey(topicInfo[0]) && _messageConfig.Keys.Contains(topicInfo[0])) topics.Add(topicInfo[0], topic);
+            if (!topics.ContainsKey(topicInfo[0])) topics.Add(topicInfo[0], topic);
             Start();
-            return null;
+            return topics[topicInfo[0]].Value;
         }
 
         protected override void DisconnectData(Topic topic)
         {
             string key = topics.Where(t => t.Value == topic).First().Key;
-            if(!string.IsNullOrEmpty(key)) topics.Remove(key);
+            if (!string.IsNullOrEmpty(key)) topics.Remove(key);
             if (topics.Count == 0)
                 Stop();
         }
-        private MessageConfig GetMessageConfig()
-        {
-            return new MessageConfig
-            {
-                Keys = new string[] {
-                    "Key1",
-                    "Key2"
-                }
-            };
-        }
         private MessageReader<string, string> GetMessageReader()
         {
-
             ConsumerConfig consumerConfig = new ConsumerConfig
             {
                 AutoOffsetReset = AutoOffsetReset.Latest,
                 BootstrapServers = "localhost:9092",
-                EnableAutoCommit = true,
+                EnableAutoCommit = false,
                 SecurityProtocol = 0,
                 SessionTimeoutMs = 6000,
                 GroupId = "excel-group",
                 ClientId = "excel"
             };
-
             return new MessageReader<string, string>("RANDOM_NUMBER_DATA", consumerConfig);
         }
     }
-    public static class Timefunctions
+    public static class Rtdfunctions
     {
         public static object GetData(string key)
         {

@@ -4,7 +4,8 @@
         "BootstrapServers": "localhost:9092",
         "EnableAutoCommit": true,
         "SecurityProtocol": 0,
-        "SessionTimeoutMs": 6000
+        "SessionTimeoutMs": 6000,
+        "MessageTimeoutMs": 10000
     },
     "MessageConfig": {
         "KafkaTopic": "RANDOM_NUMBER_DATA",

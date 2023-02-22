@@ -33,6 +33,8 @@ namespace Common.Messaging
             };
 
         }
+        public ConsumeResult<TKey, TValue> Consume() => _consumer.Consume(100);
+        public void Commit(ConsumeResult<TKey, TValue> consumeResult) => _consumer.Commit(consumeResult);
 
         public void Dispose()
         {

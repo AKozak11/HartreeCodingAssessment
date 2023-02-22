@@ -9,6 +9,8 @@ namespace Common.Messaging
         /// By default will block for 100 milliseconds or until a kafka consumeresult is available.
         /// </summary>
         public Message<TKey, TValue> ReadMessage();
+        public ConsumeResult<TKey, TValue> Consume();
+        public void Commit(ConsumeResult<TKey, TValue> consumeResult);
         public void Dispose();
     }
 }
