@@ -21,6 +21,6 @@
     <Content Include="..\..\Common\Common\KafkaConfig.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    
-    </ItemGroup>
+  </ItemGroup>
+
 </Project>
