@@ -19,20 +19,7 @@ namespace Common.Messaging
             _consumer.Subscribe(_topic);
         }
 
-        public Message<TKey, TValue> ReadMessage()
-        {
-
-            ConsumeResult<TKey, TValue> consumeResult = _consumer.Consume(100);
-
-            if (consumeResult is null) return null;
-
-            return new Message<TKey, TValue>
-            {
-                Key = consumeResult.Message.Key,
-                Value = consumeResult.Message.Value
-            };
-
-        }
+        public Message<TKey, TValue> ReadMessage() => _consumer.Consume(100)?.Message;
         public ConsumeResult<TKey, TValue> Consume() => _consumer.Consume(100);
         public void Commit(ConsumeResult<TKey, TValue> consumeResult) => _consumer.Commit(consumeResult);
 
